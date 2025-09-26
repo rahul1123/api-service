@@ -17,20 +17,6 @@ export class UserService {
     @Inject(forwardRef(() => AuthService)) public AuthService: AuthService
     
   ) {
-    const userPoolId = this.configService.get<string>("COGNITO_USER_POOL_ID");
-    const region = this.configService.get<string>("AWS_REGION");
-    const clientId = this.configService.get<string>("COGNITO_CLIENT_ID")!;
-    const clientSecret = this.configService.get<string>("COGNITO_CLIENT_SECRET")!;
-  // Throw exception if any required config is missing
-    if (!userPoolId || !region || !clientId || !clientSecret) {
-      throw new InternalServerErrorException(
-        "Missing Cognito configuration in environment variables"
-      );
-    }
-
-    this.cognitoUtil = new CognitoUtil(userPoolId, region, clientId, clientSecret);
-
-
   }
 
   async loginAdmin(req) {

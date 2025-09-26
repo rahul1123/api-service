@@ -1,5 +1,5 @@
 import { Module ,NestModule,MiddlewareConsumer} from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule,ConfigService } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';;
 import { ApiMiddleware } from './middleware/api.middleware';
@@ -12,13 +12,22 @@ import { JwtService } from '@nestjs/jwt';
 import { UserService } from './user/user.service';
 import { UserController } from './user/user.controller';
 import { AuthController } from './auth/auth.controller';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [ConfigModule.forRoot({
       isGlobal: true, // So you can use ConfigService anywhere without importing again
-    })],
+    }),// JWT setup using environment variable
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (config: ConfigService) => ({
+        secret: config.get<string>('JWT_SECRET') || 'fallbackSecretKey',
+        signOptions: { expiresIn: '1h' },
+      }),
+    }),],
   controllers: [AppController,UserController,AuthController],
-  providers: [AppService,UtilService,DbService,ErrorLoggerService,AesService,AuthService,JwtService,UserService,
+  providers: [AppService,UtilService,DbService,ErrorLoggerService,AesService,AuthService,UserService,
     AuthService],
 })
 //with middle ware 

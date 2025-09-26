@@ -37,24 +37,7 @@ export class AuthService {
     private readonly utilService: UtilService,
     public dbService: DbService,
   ) {
-    const userPoolId = this.config.get<string>('COGNITO_USER_POOL_ID');
-    this.clientId = this.config.get<string>('COGNITO_CLIENT_ID')!;
-    this.clientSecret = this.config.get<string>('COGNITO_CLIENT_SECRET')!;  // Added this line
-    this.secretKey = this.config.get<string>('JWT_SECRET') || '';
-    this.apiKey = this.config.get<string>('API_KEY') || '';
-    if (!userPoolId || !this.clientId || !this.clientSecret) {
-      throw new Error('Missing Cognito config values');
-    }
-    this.ses = new SESv2Client({
-      region: this.config.get<string>('AWS_REGION') || "eu-north-1",
-    });
-    this.cognitoClient = new CognitoIdentityProviderClient({
-      region: this.config.get<string>('AWS_REGION') || 'eu-north-1',
-      credentials: {
-        accessKeyId: this.config.get<string>('AWS_ACCESS_KEY_ID')!,
-        secretAccessKey: this.config.get<string>('AWS_SECRET_ACCESS_KEY')!,
-      },
-    });
+  
   }
 
   //sign up code with cognito 
@@ -195,34 +178,32 @@ export class AuthService {
   async signIn(request: { email: string; password: string }): Promise<any> {
     try {
       const { email, password } = request;
-      const user = await this.dbService.execute(`select id,first_name,last_name,agency_id,status from users where email='${email}'`); // implement this method
+      const user = await this.dbService.execute(`select id,first_name,last_name,password,status from users where email='${email}'`); // implement this method
       if (!user || user.length === 0) {
         throw new UnauthorizedException('Invalid email or password');
       }
-
+ 
       // 2. Check if user is active
       if (user[0]?.status !== 1) {
         throw new UnauthorizedException('User is not active');
       }
-      const isMatch = await bcrypt.compare(password, user.password);
-      if (!isMatch) {
-        throw new UnauthorizedException('Invalid email or password');
-      }
+     
+      // const isMatch = await bcrypt.compare(password, user[0].password);
+      // if (!isMatch) {
+      //   throw new UnauthorizedException('Invalid email or password');
+      // }
       const payload = {
-        sub: user.id,
+        sub: user[0].id,
         email: email,
-        agency_id: user.agency_id,
       };
-
       const accessToken = await this.jwtService.signAsync(payload, {
         expiresIn: '1h',
       });
       return {
         accessToken,
-        id: user.id,
-        agency_id: user.agency_id,
-        firstName: user.first_name,
-        lastName: user.last_name,
+        id: user[0].id,
+        firstName: user[0].first_name,
+        lastName: user[0].last_name,
       };
 
     } catch (err) {
