@@ -13,13 +13,10 @@ import { UserService } from './user/user.service';
 import { UserController } from './user/user.controller';
 import { AuthController } from './auth/auth.controller';
 
-
-
-
-
- 
 @Module({
-  imports: [],
+  imports: [ConfigModule.forRoot({
+      isGlobal: true, // So you can use ConfigService anywhere without importing again
+    })],
   controllers: [AppController,UserController,AuthController],
   providers: [AppService,UtilService,DbService,ErrorLoggerService,AesService,AuthService,JwtService,UserService,
     AuthService],

@@ -10,22 +10,12 @@ import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { SignUpDto,SignInDto } from './dto/signup.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
-
-
 @ApiTags('Auth')
 @Controller("auth")
 export class AuthController {
-    private googleClient: OAuth2Client;
-    private oAuth2Client: OAuth2Client;
     constructor(
         public authService: AuthService, private utilService: UtilService
     ) {
-        this.googleClient = new OAuth2Client();
-        this.oAuth2Client = new OAuth2Client(
-      '1042994757383-ra2u6memdacvegf51krbg95fn5ret1ef.apps.googleusercontent.com',
-      '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',
-      'http://localhost:3000/auth/google/redirect' // must match Google Cloud redirect URI
-    );
     }
 
   @Post('signup')
@@ -77,137 +67,11 @@ export class AuthController {
 
 
 
-    // /**
-    //  * Redirects user to Google OAuth
-    //  */
-    // @Get('google')
-    // @UseGuards(AuthGuard('google'))
-    // googleAuth() {
-    //     // This endpoint will redirect to Google
-    //     return { message: 'Redirecting to Google for authentication' };
-    // }
+ 
 
-    // /**
-    //  * Google OAuth callback
-    //  */
-    // @Get('google/callback')
-    // @UseGuards(AuthGuard('google'))
-    // async googleAuthRedirect(@Req() req, @Res() res: Response) {
-    //     try {
-    //         // The user object will contain the profile and JWT token from our GoogleStrategy
-    //         const { profile, accessToken } = req.user;
-            
-    //         // Return success response with token
-    //         res.status(HttpStatus.OK).json({
-    //             message: "Login successful",
-    //             accessToken,
-    //             user: {
-    //                 id: profile.id,
-    //                 email: profile.emails[0].value,
-    //                 name: profile.displayName,
-    //                 picture: profile.photos[0].value
-    //             }
-    //         });
-    //     } catch (error) {
-    //         res.status(HttpStatus.UNAUTHORIZED).json({
-    //             message: "Google authentication failed",
-    //             error: error.message
-    //         });
-    //     }
-    // }
+ 
 
-    // @Post('google/verify-token')
-    //     async verifyGoogleToken(@Body() body: { credential: string }, @Res() res: Response) {
-    //         try {
-    //             const { credential } = body;
-                
-    //             // Verify the Google token
-    //             const ticket = await this.googleClient.verifyIdToken({
-    //                 idToken: credential,
-    //                 audience: this.utilService.GOOGLE_CLIENT_ID
-    //             });
-
-    //             const payload = ticket.getPayload();
-    //             // Create a profile object similar to what we get from OAuth2
-    //             const profile = {
-    //                 id: payload.sub,
-    //                 emails: [{ value: payload.email }],
-    //                 displayName: payload.name,
-    //                 photos: [{ value: payload.picture }]
-    //             };
-
-    //             // Use the existing validateGoogleLogin method
-    //             const { accessToken: jwtToken, user } = await this.authService.validateGoogleLogin(profile);
-    //             const awsRole = this.authService.mapUserRoleToAwsRole(user.type); // <- you define this
-    //             const awsResponse = await this.authService.generateAwsSamlOrStsToken({
-    //                 email: user.email,
-    //                 name: user.name,
-    //                 roleArn: awsRole
-    //             });
-    //             res.status(HttpStatus.OK).json({
-    //                 status: true,
-    //                 result: {
-    //                     token: jwtToken,
-    //                     user: {
-    //                         id: profile.id,
-    //                         email: profile.emails[0].value,
-    //                         name: profile.displayName,
-    //                         picture: profile.photos[0].value,
-    //                         type: user.type,
-    //                         designation: user.designation,
-    //                         sessionToken: awsResponse.sessionToken // <- this can be SAML assertion or STS creds
-    //                     }
-    //                 }
-    //             });
-    //         } catch (error) {
-    //             console.error('Token verification error:', error);
-    //             res.status(HttpStatus.ACCEPTED).json({
-    //                 status: false,
-    //                 message: "Google token verification failed",
-    //                 error: error.message
-    //             });
-    //         }
-    //     }
-
-
-    @Get('google')
-  async googleAuth(@Res() res: Response) {
-    const authUrl = this.oAuth2Client.generateAuthUrl({
-      access_type: 'offline', // ensures we get refresh_token
-      scope: ['https://mail.google.com/'],
-      prompt: 'consent', // always show consent to get refresh_token
-    });
-
-    // Redirect user to Google's consent screen
-    return res.redirect(authUrl);
-  }
-
-  @Get('google/redirect')
-  async googleAuthRedirect(@Query('code') code: string, @Res() res: Response) {
-    if (!code) {
-      return res.status(400).json({ error: 'Missing code parameter' });
-    }
-
-    try {
-      const { tokens } = await this.oAuth2Client.getToken(code);
-      this.oAuth2Client.setCredentials(tokens);
-
-      console.log('Access Token:', tokens.access_token);
-      console.log('Refresh Token:', tokens.refresh_token);
-
-      // Normally, you'd store these tokens securely in DB
-      return res.json({
-        message: 'Google OAuth successful',
-        access_token: tokens.access_token,
-        refresh_token: tokens.refresh_token,
-        expiry_date: tokens.expiry_date,
-      });
-    } catch (error) {
-      console.error('Error during Google OAuth:', error);
-      return res.status(500).json({ error: 'OAuth2 token exchange failed' });
-    }
-  }
-
+  
 
 
 }

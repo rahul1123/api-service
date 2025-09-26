@@ -113,23 +113,23 @@ export class AuthService {
         } if (result.VerificationStatus === "FAILED") {
           console.log(`${email} verification failed. You may need to re-verify.`);
         }
-       console.log(`${email} status: ${result.VerificationStatus}`);
-       
+        console.log(`${email} status: ${result.VerificationStatus}`);
+
       } catch (sesErr) {
         if (sesErr.name === "AlreadyExistsException") {
           console.log("Email identity already exists, skipping verification");
         }
         if (sesErr.name !== "NotFoundException") {
-             try {
-        //case when email id not found in  ses 
-      const verifyCmd = new CreateEmailIdentityCommand({
-        EmailIdentity: email,
-      });
-      await this.ses.send(verifyCmd);
-      console.log(`📧 SESv2 verification email sent to ${email}`);
-    } catch (createErr) {
-      console.error(`❌ SES verification failed for ${email}`, createErr);
-    }   console.error(`Failed to check email identity for ${email}`, sesErr);
+          try {
+            //case when email id not found in  ses 
+            const verifyCmd = new CreateEmailIdentityCommand({
+              EmailIdentity: email,
+            });
+            await this.ses.send(verifyCmd);
+            console.log(`📧 SESv2 verification email sent to ${email}`);
+          } catch (createErr) {
+            console.error(`❌ SES verification failed for ${email}`, createErr);
+          } console.error(`Failed to check email identity for ${email}`, sesErr);
           // return;
         }
       }
@@ -193,43 +193,40 @@ export class AuthService {
   }
 
   async signIn(request: { email: string; password: string }): Promise<any> {
-    const { email, password } = request;
-    const user = await this.dbService.execute(`select id,first_name,last_name,agency_id,status from users where email='${email}'`); // implement this method
-    if (!user) {
-      throw new UnauthorizedException('Invalid email or password');
-    }
-    // 2. Check if user is active
-    if (user[0]?.status !== 1) {
-      throw new UnauthorizedException('User is not active');
-    }
-    const secretHash = this.utilService.generateSecretHash(email, this.clientId, this.clientSecret);
-    const command = new InitiateAuthCommand({
-      AuthFlow: 'USER_PASSWORD_AUTH',
-      ClientId: this.clientId,
-      AuthParameters: {
-        USERNAME: email,
-        PASSWORD: password,
-        SECRET_HASH: secretHash,
-      },
-    });
     try {
-      const response = await this.cognitoClient.send(command);
-      const authResult = response.AuthenticationResult;
-      if (!authResult) {
-        throw new UnauthorizedException('Authentication failed');
+      const { email, password } = request;
+      const user = await this.dbService.execute(`select id,first_name,last_name,agency_id,status from users where email='${email}'`); // implement this method
+      if (!user || user.length === 0) {
+        throw new UnauthorizedException('Invalid email or password');
       }
-      const { IdToken, AccessToken, RefreshToken } = authResult;
-      return {
-        accessToken: AccessToken,
-        idToken: IdToken,
-        refreshToken: RefreshToken,
-        agency_id: Number(user[0].agency_id),
-        id: Number(user[0].id),
 
+      // 2. Check if user is active
+      if (user[0]?.status !== 1) {
+        throw new UnauthorizedException('User is not active');
+      }
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch) {
+        throw new UnauthorizedException('Invalid email or password');
+      }
+      const payload = {
+        sub: user.id,
+        email: email,
+        agency_id: user.agency_id,
+      };
+
+      const accessToken = await this.jwtService.signAsync(payload, {
+        expiresIn: '1h',
+      });
+      return {
+        accessToken,
+        id: user.id,
+        agency_id: user.agency_id,
+        firstName: user.first_name,
+        lastName: user.last_name,
       };
 
     } catch (err) {
-      console.error('Cognito sign-in error:', err);
+      console.error('sign-in error:', err);
       throw new UnauthorizedException('Invalid email or password', err);
     }
   }
