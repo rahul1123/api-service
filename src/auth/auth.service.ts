@@ -202,8 +202,8 @@ export class AuthService {
       return {
         accessToken,
         id: user[0].id,
-        firstName: user[0].first_name,
-        lastName: user[0].last_name,
+        name: user[0].first_name + user[0].last_name ,
+
       };
 
     } catch (err) {
