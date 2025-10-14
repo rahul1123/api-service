@@ -60,4 +60,34 @@ export class UserFileUploadsService {
       throw new InternalServerErrorException('Failed to upload file');
     }
   }
+
+  async getAllUploads() {
+    let query = `
+      SELECT 
+        id, 
+        user_id, 
+        file_name, 
+        file_path, 
+        batch_id, 
+        remarks, 
+        upload_time, 
+        status, 
+        processed_at
+      FROM user_file_uploads
+      ORDER BY upload_time DESC;
+    `;
+
+    try {
+      const result = await this.dbService.execute(query);
+
+      if (result && result && result.length > 0) {
+        return this.utilService.successResponse(result, 'Uploads fetched successfully');
+      } else {
+        return this.utilService.successResponse([], 'No uploaded files found');
+      }
+    } catch (error) {
+      console.error('Error fetching uploaded files:', error);
+      throw new InternalServerErrorException('Error fetching uploaded files');
+    }
+  }
 }

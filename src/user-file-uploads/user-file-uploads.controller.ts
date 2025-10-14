@@ -7,6 +7,8 @@ import {
   Res,
   UploadedFile,
   UseInterceptors,
+  InternalServerErrorException,
+  Get
 } from '@nestjs/common';
 import { Response } from 'express';
 import {
@@ -109,4 +111,21 @@ export class UserFileUploadsController {
         .json({ message: 'Failed to upload file' });
     }
   }
+
+
+   @Get()
+  @ApiOperation({ summary: 'Get all uploaded files' })
+  @ApiResponse({ status: 200, description: 'List of uploaded files' })
+  @ApiResponse({ status: 500, description: 'Failed to fetch uploads' })
+  async getAll(@Res() res: Response) {
+    try {
+      const files = await this.service.getAllUploads();
+      return res.status(HttpStatus.OK).json(files);
+    } catch (err) {
+      console.error(err);
+      throw new InternalServerErrorException('Failed to fetch uploaded files');
+    }
+  }
+
+
 }
