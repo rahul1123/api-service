@@ -15,7 +15,7 @@ export class UtilService {
   public UPLOAD_DIR = "/var/www/html/ats_api/uploads/";
 
   constructor() {
-    this.NODE_ENVIRONMENT ="production";
+    this.NODE_ENVIRONMENT ="local";
     //local
     if (this.NODE_ENVIRONMENT == "local") {
      // if (this.NODE_ENVIRONMENT == "production") {
@@ -25,7 +25,7 @@ export class UtilService {
       this.DB_USER = "postgres";
       this.DB_PORT = 5432;
       this.DB_PASSWORD = "india@12345";
-      this.DB_DATABASE = "ats";
+      this.DB_DATABASE = "cms";
     } 
 
     //production configuration file

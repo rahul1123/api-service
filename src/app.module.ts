@@ -13,6 +13,12 @@ import { UserService } from './user/user.service';
 import { UserController } from './user/user.controller';
 import { AuthController } from './auth/auth.controller';
 import { JwtModule } from '@nestjs/jwt';
+import { ClusterService } from "./services/cluster/cluster.service";
+import { ResellerController } from './resellers/reseller.controller';
+import { ResellerService} from './resellers/reseller.service';
+
+
+
 
 @Module({
   imports: [ConfigModule.forRoot({
@@ -26,9 +32,9 @@ import { JwtModule } from '@nestjs/jwt';
         signOptions: { expiresIn: '1h' },
       }),
     }),],
-  controllers: [AppController,UserController,AuthController],
+  controllers: [AppController,UserController,AuthController,ResellerController],
   providers: [AppService,UtilService,DbService,ErrorLoggerService,AesService,AuthService,UserService,
-    AuthService],
+    AuthService,ClusterService,ResellerService],
 })
 //with middle ware 
 //without export class AppModule
