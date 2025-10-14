@@ -16,6 +16,8 @@ import { JwtModule } from '@nestjs/jwt';
 import { ClusterService } from "./services/cluster/cluster.service";
 import { ResellerController } from './resellers/reseller.controller';
 import { ResellerService} from './resellers/reseller.service';
+import { UserFileUploadsController } from './user-file-uploads/user-file-uploads.controller';
+import { UserFileUploadsService} from './user-file-uploads/user-file-uploads.service';
 
 
 
@@ -32,9 +34,9 @@ import { ResellerService} from './resellers/reseller.service';
         signOptions: { expiresIn: '1h' },
       }),
     }),],
-  controllers: [AppController,UserController,AuthController,ResellerController],
+  controllers: [AppController,UserController,AuthController,ResellerController,UserFileUploadsController],
   providers: [AppService,UtilService,DbService,ErrorLoggerService,AesService,AuthService,UserService,
-    AuthService,ClusterService,ResellerService],
+    AuthService,ClusterService,ResellerService,UserFileUploadsService],
 })
 //with middle ware 
 //without export class AppModule

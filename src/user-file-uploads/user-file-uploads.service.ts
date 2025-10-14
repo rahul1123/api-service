@@ -38,7 +38,7 @@ export class UserFileUploadsService {
 
     let query = `
       INSERT INTO user_file_uploads (user_id, file_name, file_path, batch_id, remarks, upload_time)
-      VALUES (${userId}, '${fileName}', '${filePath}', '${batchId}', ${remarks ? `'${remarks}'` : 'NULL'}, '${now}')
+      VALUES (78, '${fileName}', '${filePath}', '${batchId}', ${remarks ? `'${remarks}'` : 'NULL'}, '${now}')
       RETURNING *;
     `;
 
