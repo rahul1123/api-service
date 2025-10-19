@@ -1,22 +1,17 @@
-import { Controller, Get, HttpStatus, Post, Req, Res, UseGuards, Body,BadRequestException, Param,Query } from "@nestjs/common";
-import { CognitoService } from './cognito.service';
-import { UserService } from '../user/user.service';
-import { Response } from "express";
-import { AuthGuard } from "@nestjs/passport";
+import { Controller, Get, HttpStatus, Post, Req, Res, UseGuards, Body, BadRequestException, Param, Query } from "@nestjs/common";
 import { AuthService } from "./auth.service";
-import { OAuth2Client } from 'google-auth-library';
 import { UtilService } from 'src/util/util.service';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { SignUpDto,SignInDto } from './dto/signup.dto';
+import { SignUpDto, SignInDto } from './dto/signup.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 @ApiTags('Auth')
 @Controller("auth")
 export class AuthController {
-    constructor(
-        public authService: AuthService, private utilService: UtilService
-    ) {
-    }
+  constructor(
+    public authService: AuthService, private utilService: UtilService
+  ) {
+  }
 
   @Post('signup')
   @ApiOperation({ summary: 'Register a new user in Cognito and sync to DB' })
@@ -27,7 +22,7 @@ export class AuthController {
     return this.authService.signUp(signUpDto);
   }
 
-    @Post('signin')
+  @Post('signin')
   @ApiOperation({ summary: 'Authenticate user and return JWT tokens from Cognito' })
   @ApiBody({ type: SignInDto })
   @ApiResponse({ status: 200, description: 'User signed in successfully' })
@@ -57,21 +52,12 @@ export class AuthController {
       resetPasswordDto.newPassword
     );
   }
-@Get('generate-token')
+  @Get('generate-token')
   generateToken() {
     const userId = 'default-user-id';
     const email = 'default@example.com';
     const token = this.authService.getToken(userId, email);
     return { access_token: token };
   }
-
-
-
- 
-
- 
-
-  
-
 
 }
