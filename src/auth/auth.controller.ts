@@ -40,24 +40,7 @@ export class AuthController {
     return this.authService.forgotPassword(forgotPasswordDto.email);
   }
 
-  @Post('reset-password')
-  @ApiOperation({ summary: 'Reset password using verification code' })
-  @ApiBody({ type: ResetPasswordDto })
-  @ApiResponse({ status: 200, description: 'Password reset successfully' })
-  @ApiResponse({ status: 400, description: 'Failed to reset password' })
-  async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
-    return this.authService.resetPassword(
-      resetPasswordDto.email,
-      resetPasswordDto.verificationCode,
-      resetPasswordDto.newPassword
-    );
-  }
-  @Get('generate-token')
-  generateToken() {
-    const userId = 'default-user-id';
-    const email = 'default@example.com';
-    const token = this.authService.getToken(userId, email);
-    return { access_token: token };
-  }
+   
+ 
 
 }

@@ -76,15 +76,19 @@ export class AuthService {
 
   async createUser(usercreatePayload) {
     try {
+
+      let role='reseller';
       //const hashedPassword = await bcrypt.hash(usercreatePayload.password, 10); // 10 is the salt rounds
       const setData = [
         { set: 'name', value: String(usercreatePayload.name) },
         { set: 'email', value: String(usercreatePayload.email) },
         { set: 'password', value: String(usercreatePayload.password ?? '') },
         { set: 'phone', value: String(usercreatePayload.phone_number ?? '') },
-        // { set: 'role', value: String(usercreatePayload.role ?? '') },
+        { set: 'role', value: String(role) },
       ]
-      const insertion = await this.dbService.insertData('users', setData);
+      
+      const insertion = await this.dbService.insertData('tbl_users', setData);
+      // const insertion = await this.dbService.insertData('users', setData);
       return this.utilService.successResponse(insertion, 'User created successfully.');
     } catch (error) {
       console.error('Create User Error:', error);
@@ -95,14 +99,15 @@ export class AuthService {
   async signIn(request: { email: string; password: string }): Promise<any> {
     try {
       const { email, password } = request;
-      const user = await this.dbService.execute(`select id,name,password,status,role from users where email='${email}'`); // implement this method
+      const user = await this.dbService.execute(`select id,name,password,status,role from tbl_users where email='${email}'`); // implement this method
       console.log(user,'user')
       if (!user || user.length === 0) {
         throw new UnauthorizedException('Invalid email or password');
       }
 
       // 2. Check if user is active
-      if (user[0]?.status !== 1) {
+      //if (user[0]?.status !== 'active') { before condition is 1
+      if (user[0]?.status !== 'active') {
         throw new UnauthorizedException('User is not active');
       }
       const isMatch = await bcrypt.compare(password, user[0].password);
@@ -139,25 +144,4 @@ export class AuthService {
     }
   }
 
-  async resetPassword(email: string, verificationCode: string, newPassword: string): Promise<any> {
-    const secretHash = this.utilService.generateSecretHash(email, this.clientId, this.clientSecret);
-    const command = new ConfirmForgotPasswordCommand({
-      ClientId: this.clientId,
-      Username: email,
-      ConfirmationCode: verificationCode,
-      Password: newPassword,
-      SecretHash: secretHash,
-    });
-
-    try {
-      await this.cognitoClient.send(command);
-      return {
-        success: true,
-        message: 'Password has been reset successfully'
-      };
-    } catch (err) {
-      console.error('Cognito reset password error:', err);
-      throw new BadRequestException(err.message || 'Failed to reset password');
-    }
-  }
 }
