@@ -13,19 +13,19 @@ export class ResellerService {
     public utilService: UtilService,
   ) {}
 
-  // 📌 Get All Resellers
+  // Get All Resellers
   async findAll() {
     try {
-      const query = `SELECT * FROM users  where role='R' ORDER BY updated_at DESC`;
+      const query = `SELECT * FROM tbl_users  where role='reseller' ORDER BY updated_at DESC`;
       const list = await this.dbService.execute(query);
       // Transform each reseller
     const transformedList = list.map(reseller => {
       // Fallback email to reseller.email if reseller_primary_email is null
-      const email = reseller.reseller_primary_email || reseller.email || null;
+      const email = reseller.primary_email || reseller.email || null;
 
       // If primary first/last name are not provided, try to parse from reseller.name
-      let firstName = reseller.reseller_primary_first_name;
-      let lastName = reseller.reseller_primary_last_name;
+      let firstName = reseller.primary_first_name;
+      let lastName = reseller.primary_last_name;
 
       if (!firstName || !lastName) {
         // Try splitting reseller.name by space
@@ -59,7 +59,7 @@ export class ResellerService {
   // 📌 Get Reseller By ID
   async findOne(id: number) {
     try {
-      const query = 'SELECT * FROM users  WHERE id = $1';
+      const query = 'SELECT * FROM tbl_users  WHERE id = $1';
       const result = await this.dbService.executeQuery(query, [id]);
 
       if (result.length === 0) {
@@ -75,11 +75,11 @@ export class ResellerService {
     }
   }
 
-  // 📌 Create Reseller
+  //Create Reseller
   async create(dto: CreateResellerDto) {
     try {
       const query = `
-        INSERT INTO users  (
+        INSERT INTO tbl_users  (
           domain,
           org_display_name,
           alternate_email,
@@ -92,7 +92,6 @@ export class ResellerService {
         VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
         RETURNING *;
       `;
-
       const values = [
         dto.domain,
         dto.orgDisplayName,
@@ -110,11 +109,11 @@ export class ResellerService {
     }
   }
 
-  // 📌 Update Reseller
+  //Update Reseller
   async update(id: number, dto: UpdateResellerDto) {
     try {
       const query = `
-        UPDATE users  SET
+        UPDATE tbl_users  SET
           domain = $1,
           org_display_name = $2,
           alternate_email = $3,
@@ -151,10 +150,10 @@ export class ResellerService {
     }
   }
 
-  // 📌 Delete Reseller
+  // Delete Reseller
   async remove(id: number) {
     try {
-      const query = 'DELETE FROM users  WHERE id = $1 RETURNING *';
+      const query = 'DELETE FROM tbl_users  WHERE id = $1 RETURNING *';
       const result = await this.dbService.executeQuery(query, [id]);
 
       if (result.length === 0) {
@@ -172,19 +171,5 @@ export class ResellerService {
     }
   }
 
-  // 📌 Bulk Delete Resellers
-  async bulkDelete(ids: number[]) {
-    try {
-      const query = `DELETE FROM users  WHERE id = ANY($1::int[]) RETURNING id`;
-      const result = await this.dbService.executeQuery(query, [ids]);
-
-      return this.utilService.successResponse(
-        result,
-        `${result.length} reseller(s) deleted successfully`,
-      );
-    } catch (error) {
-      console.error('Error during bulk delete:', error);
-      throw new InternalServerErrorException('Failed to bulk delete resellers');
-    }
-  }
+ 
 }

@@ -94,20 +94,4 @@ export class ResellerController {
     }
   }
 
-  @Post('bulk-delete')
-  @ApiOperation({ summary: 'Bulk delete resellers' })
-  async bulkDelete(
-    @Body() body: { ids: number[] },
-    @Res() res: Response,
-  ) {
-    try {
-      await this.resellerService.bulkDelete(body.ids);
-      return res
-        .status(HttpStatus.OK)
-        .json({ message: 'Resellers deleted successfully' });
-    } catch (err) {
-      console.error(err);
-      throw new InternalServerErrorException('Failed to bulk delete resellers');
-    }
-  }
 }
