@@ -1,7 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import * as moment from "moment";
 import * as crypto from 'crypto';
-
 @Injectable()
 export class UtilService {
   KEY = "";
@@ -11,15 +10,9 @@ export class UtilService {
   public DB_PORT = 0;
   public DB_PASSWORD = "";
   public DB_DATABASE = "";
-  public CASE_BASE_DIR = "/var/www/html/ats_api/cases/";
-  public UPLOAD_DIR = "/var/www/html/ats_api/uploads/";
-
+  public UPLOAD_DIR = "/var/www/html/api-service/uploads/";
   constructor() {
-    this.NODE_ENVIRONMENT ="local";
-    //local
     if (this.NODE_ENVIRONMENT == "local") {
-     // if (this.NODE_ENVIRONMENT == "production") {
-      
       this.NODE_ENVIRONMENT = "local";
       this.DB_HOST = "localhost";
       this.DB_USER = "postgres";
@@ -38,7 +31,6 @@ export class UtilService {
       this.DB_DATABASE = "services";
     }
   }
-
   successResponse = (result: any, message = "") => {
     return {
       status: true,
